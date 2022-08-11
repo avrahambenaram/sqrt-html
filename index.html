@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raíz Quadrada Descomplicada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body {
+            padding: 1vh 1vw;
+        }
+        div#explanation {
+            margin-bottom: 10px;
+        }
+        label {
+            display: flex;
+        }
+        div.operation.original-calc {
+            width: 170px;
+            padding: 10px;
+            border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.1);
+
+            display: flex;
+            justify-content: center;
+        }
+        div.operation {
+            display: flex;
+            align-items: center;
+        }
+        div.operation > * {
+            margin: 0 2.5px;
+        }
+        div.fraction {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        span.calc {
+            text-decoration: underline;
+        }
+        p.result {
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div id="explanation">
+        <p>É um processo de repetição, onde você vai fazendo esse loop e troca do valor do A até onde desejar, uma máquina por exemplo, pode e claro, faz 100, 200 ou até mais vezes pra descobrir a raíz quadrada exata, em <i>N</i> casa decimais</p>
+        <p>Fórmula:</p>
+        <div class="operation original-calc">
+            <div class="fraction">
+                <span class="calc">A+X/A</span>
+                <span>2</span>
+            </div>
+            <p>=</p>
+            <p class="result">(Próxima A)</p>
+        </div>
+        <p><i>X</i> é o número desejado para descobrir a raíz quadrada e <i>A</i> é o número atual do loop</p>
+        <p>Mais em baixo, há um campo para você verificar qual o processo que uma máquina e calculadoras fazem antes de mostrar o resultado ao usuário</p>
+    </div>
+    <p>Digite o valor que deseja saber a raíz quadrada</p>
+    <label>
+        <input id="calc-num" type="number" placeholder="Digite o número">
+        <button id="calc-btn">Calcular</button>
+    </label>
+    <div id="operations"></div>
+    <script>
+        (function(){
+            function sqrt(x) {
+                let a = (x+1)/2
+                for (let i = 0; i < 200; i++) {
+                    a = (a+x/a)/2
+                }
+                return a;
+            }
+
+            const calcNum = document.getElementById('calc-num');
+            const calcBtn = document.getElementById('calc-btn');
+            const operationsDiv = document.getElementById('operations');
+
+            calcBtn.addEventListener('click', calcSqrt);
+
+            function calcSqrt() {
+                operationsDiv.innerHTML = '';
+
+                const nums = [];
+                const input = parseFloat(calcNum.value);
+                const operations = [];
+                const trueValue = sqrt(input);
+                let currentResult = 0;
+
+                while (trueValue != currentResult) {
+                    if (!currentResult) {
+                        currentResult = (input+1)/2;
+                        operations.push({
+                            initial: input,
+                            final: currentResult
+                        })
+                    } else {
+                        const initialResult = currentResult;
+                        currentResult = (currentResult+input/currentResult)/2;
+                        operations.push({
+                            initial: initialResult,
+                            final: currentResult
+                        })
+                    }
+                }
+
+                operations.forEach((operation, index) => {
+                    const $operation = document.createElement('div');
+
+                    $operation.innerHTML = `
+                    <div class="fraction">
+                        <span class="calc">${operation.initial}+${input}/${operation.initial}</span>
+                        <span>2</span>
+                    </div>
+                    <p>=</p>
+                    <p class="result">${operation.final}</p>
+                    `
+                    $operation.classList.add('operation');
+                    operationsDiv.appendChild($operation);
+
+                    if (index === operations.length - 1) {
+                        operationsDiv.innerHTML += `
+                        <p>Portanto, √${input} ≈ ${operation.final}</p>
+                        <p><i>Nota: o resultado final está aproximado em 15 casas decimais, afinal é um número irracional</i></p>
+                        `
+                    }
+                })
+            }
+        })()
+    </script>
+</body>
+</html>
